@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GlorySound — Gospel Music</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:ital,wght@0,300;0,400;0,700;1,300&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:       #0a0f0f;
+  --sidebar:  #0f1a1a;
+  --card:     #142020;
+  --card2:    #1a2a2a;
+  --teal:     #00c9c9;
+  --teal-dim: #007a7a;
+  --orange:   #f97316;
+  --orange2:  #fb923c;
+  --gold:     #d4a853;
+  --white:    #eefafa;
+  --muted:    rgba(238,250,250,0.45);
+  --border:   rgba(0,201,201,0.12);
+}
+
+body {
+  background: var(--bg);
+  color: var(--white);
+  font-family: 'Lato', sans-serif;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  grid-template-rows: 1fr 90px;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.sidebar {
+  background: var(--sidebar);
+  grid-row: 1; grid-column: 1;
+  padding: 24px 16px;
+  display: flex; flex-direction: column; gap: 32px;
+  overflow-y: auto;
+  border-right: 1px solid var(--border);
+}
+
+.logo { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700; color: var(--white); padding: 0 8px; letter-spacing: 1px; }
+.logo span { color: var(--teal); }
+
+.nav-section { display: flex; flex-direction: column; gap: 4px; }
+.nav-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 0 12px; margin-bottom: 8px; }
+
+.nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 6px; cursor: pointer; font-size: 14px; color: var(--muted); transition: all 0.2s; border: 1px solid transparent; }
+.nav-item:hover { background: var(--card); color: var(--white); }
+.nav-item.active { background: var(--card2); color: var(--teal); border-color: var(--border); }
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+.playlist-item { padding: 8px 12px; font-size: 13px; color: var(--muted); cursor: pointer; border-radius: 4px; transition: all 0.2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.playlist-item:hover { color: var(--white); background: var(--card); }
+
+.main { grid-row: 1; grid-column: 2; overflow-y: auto; padding: 24px 32px; background: linear-gradient(180deg, rgba(0,201,201,0.06) 0%, var(--bg) 300px); }
+
+.topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+.page-title { font-family: 'Cinzel', serif; font-size: 28px; font-weight: 700; letter-spacing: 1px; }
+
+.search-box { display: flex; align-items: center; gap: 10px; background: var(--card); border: 1px solid var(--border); border-radius: 24px; padding: 10px 18px; width: 260px; }
+.search-box input { background: none; border: none; outline: none; color: var(--white); font-family: 'Lato', sans-serif; font-size: 14px; width: 100%; }
+.search-box input::placeholder { color: var(--muted); }
+
+.section-title { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 600; margin-bottom: 16px; margin-top: 36px; letter-spacing: 0.5px; }
+
+.verse-banner { background: linear-gradient(135deg, var(--teal-dim), #0a1a1a 60%, rgba(249,115,22,0.3)); border: 1px solid var(--teal-dim); border-radius: 12px; padding: 32px 36px; position: relative; overflow: hidden; margin-bottom: 36px; cursor: pointer; transition: transform 0.2s; }
+.verse-banner:hover { transform: scale(1.005); }
+.verse-banner::before { content: '✝'; position: absolute; right: 32px; top: 50%; transform: translateY(-50%); font-size: 80px; color: rgba(0,201,201,0.08); }
+.vb-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--teal); margin-bottom: 10px; }
+.vb-text { font-family: 'Lato', sans-serif; font-size: 18px; font-style: italic; font-weight: 300; line-height: 1.7; color: var(--white); max-width: 600px; margin-bottom: 10px; }
+.vb-ref { font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold); }
+.vb-btn { position: absolute; bottom: 24px; right: 24px; background: var(--orange); color: #fff; border: none; border-radius: 20px; padding: 8px 20px; font-size: 12px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: background 0.2s; }
+.vb-btn:hover { background: var(--orange2); }
+
+.cards-row { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; scrollbar-width: none; }
+.cards-row::-webkit-scrollbar { display: none; }
+
+.song-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; min-width: 155px; cursor: pointer; transition: all 0.25s; flex-shrink: 0; }
+.song-card:hover { background: var(--card2); border-color: var(--teal-dim); transform: translateY(-2px); }
+.song-card.active { border-color: var(--teal); background: var(--card2); }
+.sc-art { width: 100%; aspect-ratio: 1; border-radius: 6px; background: linear-gradient(135deg, var(--teal-dim), var(--bg)); display: flex; align-items: center; justify-content: center; font-size: 36px; margin-bottom: 12px; }
+.sc-title { font-family: 'Cinzel', serif; font-size: 12px; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sc-artist { font-size: 12px; color: var(--muted); }
+
+.song-table { width: 100%; border-collapse: collapse; }
+.song-table thead tr { border-bottom: 1px solid var(--border); }
+.song-table th { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); padding: 8px 16px; text-align: left; }
+.song-table tbody tr { cursor: pointer; transition: background 0.15s; }
+.song-table tbody tr:hover { background: var(--card); }
+.song-table tbody tr.playing { background: rgba(0,201,201,0.07); }
+.song-table td { padding: 10px 16px; font-size: 14px; }
+.td-num { color: var(--muted); width: 40px; font-size: 13px; }
+.td-title { font-weight: 700; }
+.td-artist { color: var(--muted); }
+.td-dur { color: var(--muted); text-align: right; }
+.playing-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--teal); animation: blink 1s infinite; margin-right: 4px; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+.pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.pill { font-size: 12px; font-weight: 700; letter-spacing: 1px; border: 1px solid var(--border); background: transparent; color: var(--muted); padding: 6px 16px; border-radius: 20px; cursor: pointer; transition: all 0.2s; }
+.pill:hover, .pill.active { background: var(--teal-dim); border-color: var(--teal); color: var(--white); }
+
+.verse-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.vc { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; cursor: pointer; transition: all 0.2s; }
+.vc:hover { background: var(--card2); border-color: var(--teal-dim); }
+.vc-ref { font-family: 'Cinzel', serif; font-size: 12px; color: var(--orange); margin-bottom: 8px; }
+.vc-text { font-size: 13px; font-style: italic; color: var(--muted); line-height: 1.65; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+.player { grid-row: 2; grid-column: 1 / 3; background: #0c1818; border-top: 1px solid var(--border); display: grid; grid-template-columns: 280px 1fr 280px; align-items: center; padding: 0 24px; gap: 16px; }
+
+.player-track { display: flex; align-items: center; gap: 14px; }
+.pt-art { width: 52px; height: 52px; border-radius: 6px; background: linear-gradient(135deg, var(--teal-dim), var(--bg)); display: flex; align-items: center; justify-content: center; font-size: 24px; flex-shrink: 0; }
+.pt-title { font-family: 'Cinzel', serif; font-size: 13px; font-weight: 600; margin-bottom: 3px; }
+.pt-artist { font-size: 12px; color: var(--muted); }
+.pt-heart { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; margin-left: 8px; transition: color 0.2s; }
+.pt-heart:hover { color: var(--orange); }
+
+.player-center { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.controls { display: flex; align-items: center; gap: 20px; }
+.ctrl { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; transition: color 0.2s, transform 0.15s; }
+.ctrl:hover { color: var(--white); transform: scale(1.1); }
+.play-pause { width: 40px; height: 40px; border-radius: 50%; background: var(--white); border: none; color: var(--bg); font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s, background 0.2s; }
+.play-pause:hover { transform: scale(1.06); background: var(--teal); }
+
+.progress-row { display: flex; align-items: center; gap: 10px; width: 100%; }
+.time { font-size: 11px; color: var(--muted); min-width: 32px; }
+.prog-bar { flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; cursor: pointer; position: relative; }
+.prog-fill { height: 100%; background: linear-gradient(90deg, var(--teal), var(--orange)); border-radius: 2px; width: 0%; transition: width 0.1s linear; }
+
+.player-right { display: flex; align-items: center; gap: 10px; justify-content: flex-end; }
+.vol-icon { font-size: 15px; color: var(--muted); }
+.vol-bar { -webkit-appearance: none; width: 90px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; outline: none; cursor: pointer; }
+.vol-bar::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: var(--white); cursor: pointer; }
+
+#vpop { position: fixed; inset: 0; background: rgba(5,10,10,0.9); backdrop-filter: blur(10px); z-index: 999; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fi 0.3s ease; }
+#vpop.hide { display: none; }
+@keyframes fi { from{opacity:0} to{opacity:1} }
+.vpop-box { background: var(--card2); border: 1px solid var(--teal-dim); border-radius: 16px; max-width: 560px; width: 100%; padding: 44px 40px 36px; position: relative; box-shadow: 0 0 80px rgba(0,201,201,0.2); animation: su 0.35s cubic-bezier(0.16,1,0.3,1); }
+@keyframes su { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+.vpop-box::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--teal), var(--orange)); border-radius: 16px 16px 0 0; }
+.vpop-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--teal); margin-bottom: 20px; }
+.vpop-cross { font-size: 28px; color: var(--orange); margin-bottom: 18px; display: block; }
+.vpop-text { font-size: 22px; font-style: italic; font-weight: 300; line-height: 1.75; margin-bottom: 18px; }
+.vpop-ref { font-family: 'Cinzel', serif; font-size: 14px; color: var(--gold); margin-bottom: 32px; }
+.vpop-close { background: var(--teal-dim); color: var(--white); border: none; border-radius: 24px; padding: 12px 32px; font-size: 13px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: background 0.2s; }
+.vpop-close:hover { background: var(--orange); }
+
+.main::-webkit-scrollbar { width: 6px; }
+.main::-webkit-scrollbar-track { background: transparent; }
+.main::-webkit-scrollbar-thumb { background: var(--teal-dim); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div id="vpop">
+  <div class="vpop-box">
+    <div class="vpop-label">✦ Verse of the Day</div>
+    <span class="vpop-cross">✝</span>
+    <p class="vpop-text" id="vp-text"></p>
+    <div class="vpop-ref" id="vp-ref"></div>
+    <button class="vpop-close" onclick="closePopup()">Enter GlorySound →</button>
+  </div>
+</div>
+
+<aside class="sidebar">
+  <div class="logo">Glory<span>Sound</span></div>
+  <div class="nav-section">
+    <div class="nav-label">Menu</div>
+    <div class="nav-item active" onclick="showPage('home',this)"><span class="icon">🏠</span> Home</div>
+    <div class="nav-item" onclick="showPage('search',this)"><span class="icon">🔍</span> Search</div>
+    <div class="nav-item" onclick="showPage('verses',this)"><span class="icon">✝</span> Bible Verses</div>
+    <div class="nav-item" onclick="showPage('gospel',this)"><span class="icon">🎵</span> Gospel Songs</div>
+  </div>
+  <div class="nav-section">
+    <div class="nav-label">Playlists</div>
+    <div class="playlist-list" id="playlist-list"></div>
+  </div>
+</aside>
+
+<main class="main">
+  <div id="page-home">
+    <div class="topbar"><div class="page-title">Good Day 🙏</div></div>
+    <div class="verse-banner" onclick="openPopup()">
+      <div class="vb-label">✦ Verse of the Day</div>
+      <p class="vb-text" id="home-verse-text"></p>
+      <div class="vb-ref" id="home-verse-ref"></div>
+      <button class="vb-btn" onclick="event.stopPropagation();nextVerse()">New Verse ↻</button>
+    </div>
+    <div class="section-title">Featured Gospel</div>
+    <div class="cards-row" id="featured-cards"></div>
+    <div class="section-title">All Songs</div>
+    <table class="song-table">
+      <thead><tr><th>#</th><th>Title</th><th>Artist</th><th style="text-align:right">Duration</th></tr></thead>
+      <tbody id="all-songs-table"></tbody>
+    </table>
+  </div>
+
+  <div id="page-search" style="display:none">
+    <div class="topbar">
+      <div class="page-title">Search</div>
+      <div class="search-box"><span>🔍</span><input type="text" id="search-input" placeholder="Songs, verses, artists…" oninput="doSearch(this.value)"></div>
+    </div>
+    <div id="search-results"></div>
+  </div>
+
+  <div id="page-verses" style="display:none">
+    <div class="topbar"><div class="page-title">Bible Verses</div></div>
+    <div class="pills" id="verse-pills"></div>
+    <div class="verse-grid" id="verse-grid"></div>
+  </div>
+
+  <div id="page-gospel" style="display:none">
+    <div class="topbar"><div class="page-title">Gospel Songs</div></div>
+    <table class="song-table">
+      <thead><tr><th>#</th><th>Title</th><th>Artist</th><th style="text-align:right">Duration</th></tr></thead>
+      <tbody id="gospel-songs-table"></tbody>
+    </table>
+  </div>
+</main>
+
+<div class="player">
+  <div class="player-track">
+    <div class="pt-art" id="pt-art">🎵</div>
+    <div>
+      <div class="pt-title" id="pt-title">Amazing Grace</div>
+      <div class="pt-artist" id="pt-artist">Traditional Gospel</div>
+    </div>
+    <button class="pt-heart" id="heart-btn" onclick="toggleHeart()">♡</button>
+  </div>
+  <div class="player-center">
+    <div class="controls">
+      <button class="ctrl" onclick="shuffle()">⇄</button>
+      <button class="ctrl" onclick="prevSong()">⏮</button>
+      <button class="play-pause" id="pp-btn" onclick="togglePlay()">▶</button>
+      <button class="ctrl" onclick="nextSong()">⏭</button>
+      <button class="ctrl">↻</button>
+    </div>
+    <div class="progress-row">
+      <span class="time" id="t-cur">0:00</span>
+      <div class="prog-bar" id="prog-bar" onclick="seek(event)"><div class="prog-fill" id="prog-fill"></div></div>
+      <span class="time" id="t-tot">3:45</span>
+    </div>
+  </div>
+  <div class="player-right">
+    <span class="vol-icon">🔈</span>
+    <input type="range" class="vol-bar" min="0" max="100" value="75">
+    <span class="vol-icon">🔊</span>
+  </div>
+</div>
+
+<script>
+const VERSES = [
+  {ref:"Psalm 23:1",text:"The Lord is my shepherd; I shall not want.",cat:"Psalms"},
+  {ref:"Psalm 46:1",text:"God is our refuge and strength, a very present help in trouble.",cat:"Psalms"},
+  {ref:"Psalm 91:1",text:"He who dwells in the shelter of the Most High will abide in the shadow of the Almighty.",cat:"Psalms"},
+  {ref:"Psalm 34:18",text:"The Lord is near to the brokenhearted and saves the crushed in spirit.",cat:"Psalms"},
+  {ref:"Psalm 27:1",text:"The Lord is my light and my salvation; whom shall I fear?",cat:"Psalms"},
+  {ref:"Psalm 37:4",text:"Delight yourself in the Lord, and he will give you the desires of your heart.",cat:"Psalms"},
+  {ref:"Psalm 119:105",text:"Your word is a lamp to my feet and a light to my path.",cat:"Psalms"},
+  {ref:"Psalm 51:10",text:"Create in me a clean heart, O God, and renew a right spirit within me.",cat:"Psalms"},
+  {ref:"Psalm 16:11",text:"In your presence there is fullness of joy; at your right hand are pleasures forevermore.",cat:"Psalms"},
+  {ref:"Proverbs 3:5-6",text:"Trust in the Lord with all your heart, and do not lean on your own understanding. In all your ways acknowledge him, and he will make straight your paths.",cat:"Proverbs"},
+  {ref:"Proverbs 4:23",text:"Keep your heart with all vigilance, for from it flow the springs of life.",cat:"Proverbs"},
+  {ref:"Proverbs 16:3",text:"Commit your work to the Lord, and your plans will be established.",cat:"Proverbs"},
+  {ref:"Proverbs 22:6",text:"Train up a child in the way he should go; even when he is old he will not depart from it.",cat:"Proverbs"},
+  {ref:"Isaiah 40:31",text:"But they who wait for the Lord shall renew their strength; they shall mount up with wings like eagles.",cat:"Isaiah"},
+  {ref:"Isaiah 41:10",text:"Fear not, for I am with you; be not dismayed, for I am your God; I will strengthen you, I will help you.",cat:"Isaiah"},
+  {ref:"Isaiah 26:3",text:"You keep him in perfect peace whose mind is stayed on you, because he trusts in you.",cat:"Isaiah"},
+  {ref:"Isaiah 53:5",text:"With his wounds we are healed.",cat:"Isaiah"},
+  {ref:"Jeremiah 29:11",text:"For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope.",cat:"Jeremiah"},
+  {ref:"Jeremiah 33:3",text:"Call to me and I will answer you, and will tell you great and hidden things that you have not known.",cat:"Jeremiah"},
+  {ref:"Joshua 1:9",text:"Be strong and courageous. Do not be frightened, and do not be dismayed, for the Lord your God is with you wherever you go.",cat:"Old Testament"},
+  {ref:"Lamentations 3:22-23",text:"The steadfast love of the Lord never ceases; his mercies never come to an end; they are new every morning.",cat:"Old Testament"},
+  {ref:"Micah 6:8",text:"What does the Lord require of you but to do justice, and to love kindness, and to walk humbly with your God?",cat:"Old Testament"},
+  {ref:"John 3:16",text:"For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life.",cat:"John"},
+  {ref:"John 10:10",text:"I came that they may have life and have it abundantly.",cat:"John"},
+  {ref:"John 14:6",text:"I am the way, and the truth, and the life. No one comes to the Father except through me.",cat:"John"},
+  {ref:"John 14:27",text:"Peace I leave with you; my peace I give to you. Let not your hearts be troubled, neither let them be afraid.",cat:"John"},
+  {ref:"John 16:33",text:"In the world you will have tribulation. But take heart; I have overcome the world.",cat:"John"},
+  {ref:"John 15:5",text:"I am the vine; you are the branches. Apart from me you can do nothing.",cat:"John"},
+  {ref:"Romans 8:28",text:"And we know that for those who love God all things work together for good.",cat:"Romans"},
+  {ref:"Romans 8:38-39",text:"Nothing in all creation will be able to separate us from the love of God in Christ Jesus our Lord.",cat:"Romans"},
+  {ref:"Romans 5:8",text:"But God shows his love for us in that while we were still sinners, Christ died for us.",cat:"Romans"},
+  {ref:"Romans 12:2",text:"Do not be conformed to this world, but be transformed by the renewal of your mind.",cat:"Romans"},
+  {ref:"Philippians 4:13",text:"I can do all things through him who strengthens me.",cat:"Philippians"},
+  {ref:"Philippians 4:7",text:"And the peace of God, which surpasses all understanding, will guard your hearts and your minds in Christ Jesus.",cat:"Philippians"},
+  {ref:"Philippians 4:6",text:"Do not be anxious about anything, but in everything by prayer and supplication with thanksgiving let your requests be made known to God.",cat:"Philippians"},
+  {ref:"Philippians 4:4",text:"Rejoice in the Lord always; again I will say, rejoice.",cat:"Philippians"},
+  {ref:"Matthew 6:33",text:"But seek first the kingdom of God and his righteousness, and all these things will be added to you.",cat:"Matthew"},
+  {ref:"Matthew 11:28",text:"Come to me, all who labor and are heavy laden, and I will give you rest.",cat:"Matthew"},
+  {ref:"Matthew 5:9",text:"Blessed are the peacemakers, for they shall be called sons of God.",cat:"Matthew"},
+  {ref:"1 Corinthians 13:4-5",text:"Love is patient and kind; love does not envy or boast; it is not arrogant or rude.",cat:"New Testament"},
+  {ref:"Galatians 5:22-23",text:"But the fruit of the Spirit is love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, self-control.",cat:"New Testament"},
+  {ref:"Ephesians 2:8",text:"For by grace you have been saved through faith. And this is not your own doing; it is the gift of God.",cat:"New Testament"},
+  {ref:"Ephesians 6:10",text:"Finally, be strong in the Lord and in the strength of his might.",cat:"New Testament"},
+  {ref:"2 Timothy 1:7",text:"For God gave us a spirit not of fear but of power and love and self-control.",cat:"New Testament"},
+  {ref:"Hebrews 11:1",text:"Now faith is the assurance of things hoped for, the conviction of things not seen.",cat:"New Testament"},
+  {ref:"James 1:2-3",text:"Count it all joy, my brothers, when you meet trials of various kinds, for you know that the testing of your faith produces steadfastness.",cat:"New Testament"},
+  {ref:"1 Peter 5:7",text:"Casting all your anxieties on him, because he cares for you.",cat:"New Testament"},
+  {ref:"1 John 4:8",text:"Anyone who does not love does not know God, because God is love.",cat:"New Testament"},
+  {ref:"Revelation 21:4",text:"He will wipe away every tear from their eyes, and death shall be no more, neither shall there be mourning, nor crying, nor pain anymore.",cat:"New Testament"},
+];
+
+const SONGS = [
+  {title:"Amazing Grace",artist:"Traditional Gospel",duration:"3:45",icon:"🎵"},
+  {title:"How Great Thou Art",artist:"Stuart K. Hine",duration:"4:12",icon:"🎶"},
+  {title:"Blessed Assurance",artist:"Fanny Crosby",duration:"3:28",icon:"🎵"},
+  {title:"This Little Light of Mine",artist:"Traditional",duration:"2:55",icon:"✨"},
+  {title:"Oh Happy Day",artist:"Edwin Hawkins Singers",duration:"4:47",icon:"🎶"},
+  {title:"Total Praise",artist:"Richard Smallwood",duration:"5:02",icon:"🎵"},
+  {title:"I Can Only Imagine",artist:"MercyMe",duration:"4:09",icon:"🙏"},
+  {title:"Waymaker",artist:"Sinach",duration:"5:34",icon:"🎶"},
+  {title:"Goodness of God",artist:"Bethel Music",duration:"5:11",icon:"✝"},
+  {title:"Great Is Thy Faithfulness",artist:"Thomas Chisholm",duration:"3:58",icon:"🎵"},
+  {title:"His Eye Is on the Sparrow",artist:"Civilla D. Martin",duration:"4:30",icon:"🕊️"},
+  {title:"Battle Hymn of the Republic",artist:"Traditional",duration:"3:22",icon:"🎶"},
+  {title:"Lift Every Voice and Sing",artist:"James W. Johnson",duration:"4:15",icon:"🎵"},
+  {title:"Wade in the Water",artist:"Traditional Spiritual",duration:"3:50",icon:"💧"},
+  {title:"Go Down Moses",artist:"Traditional Spiritual",duration:"4:05",icon:"✝"},
+];
+
+const PLAYLISTS = ["Worship Sunday","Morning Devotion","Evening Peace","Praise & Worship","Hymns Classic","Spiritual Healing"];
+
+let curSong=0, playing=false, progress=0, timer=null, curVerse=0, liked=false, verseFilter='All';
+
+window.onload = () => {
+  curVerse = Math.floor(Date.now()/86400000) % VERSES.length;
+  setVerse();
+  renderFeatured();
+  renderAllSongs();
+  renderGospelSongs();
+  renderVerseGrid();
+  renderVersePills();
+  renderPlaylists();
+  updatePlayer();
+};
+
+function setVerse() {
+  const v = VERSES[curVerse];
+  document.getElementById('vp-text').textContent = v.text;
+  document.getElementById('vp-ref').textContent = '— '+v.ref;
+  document.getElementById('home-verse-text').textContent = v.text;
+  document.getElementById('home-verse-ref').textContent = '— '+v.ref;
+}
+function nextVerse() { curVerse=(curVerse+1)%VERSES.length; setVerse(); }
+function openPopup() { document.getElementById('vpop').classList.remove('hide'); }
+function closePopup() { document.getElementById('vpop').classList.add('hide'); }
+
+function renderFeatured() {
+  document.getElementById('featured-cards').innerHTML = SONGS.slice(0,8).map((s,i)=>`
+    <div class="song-card ${i===curSong?'active':''}" onclick="playSong(${i})">
+      <div class="sc-art">${s.icon}</div>
+      <div class="sc-title">${s.title}</div>
+      <div class="sc-artist">${s.artist}</div>
+    </div>`).join('');
+}
+
+function renderSongTable(id, songs, offset=0) {
+  document.getElementById(id).innerHTML = songs.map((s,i)=>`
+    <tr class="${(i+offset)===curSong?'playing':''}" onclick="playSong(${i+offset})">
+      <td class="td-num">${(i+offset)===curSong?'<span class="playing-dot"></span>':i+offset+1}</td>
+      <td class="td-title">${s.title}</td>
+      <td class="td-artist">${s.artist}</td>
+      <td class="td-dur">${s.duration}</td>
+    </tr>`).join('');
+}
+function renderAllSongs() { renderSongTable('all-songs-table',SONGS); }
+function renderGospelSongs() { renderSongTable('gospel-songs-table',SONGS); }
+
+function renderVersePills() {
+  const cats = ['All',...new Set(VERSES.map(v=>v.cat))];
+  document.getElementById('verse-pills').innerHTML = cats.map(c=>
+    `<button class="pill ${c===verseFilter?'active':''}" onclick="setVerseFilter('${c}',this)">${c}</button>`
+  ).join('');
+}
+function setVerseFilter(cat,btn) {
+  verseFilter=cat;
+  document.querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  renderVerseGrid();
+}
+function renderVerseGrid() {
+  const list = verseFilter==='All' ? VERSES : VERSES.filter(v=>v.cat===verseFilter);
+  document.getElementById('verse-grid').innerHTML = list.map(v=>`
+    <div class="vc" onclick="showVerse(${VERSES.indexOf(v)})">
+      <div class="vc-ref">${v.ref}</div>
+      <p class="vc-text">${v.text}</p>
+    </div>`).join('');
+}
+function showVerse(idx) { curVerse=idx; setVerse(); openPopup(); }
+
+function renderPlaylists() {
+  document.getElementById('playlist-list').innerHTML = PLAYLISTS.map(p=>`<div class="playlist-item">♪ ${p}</div>`).join('');
+}
+
+function showPage(name,el) {
+  ['home','search','verses','gospel'].forEach(p=>{
+    document.getElementById('page-'+p).style.display=p===name?'':'none';
+  });
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function doSearch(q) {
+  const r=document.getElementById('search-results');
+  if (!q.trim()) { r.innerHTML=''; return; }
+  const ql=q.toLowerCase();
+  const songs=SONGS.filter(s=>s.title.toLowerCase().includes(ql)||s.artist.toLowerCase().includes(ql));
+  const verses=VERSES.filter(v=>v.text.toLowerCase().includes(ql)||v.ref.toLowerCase().includes(ql));
+  r.innerHTML=`
+    ${songs.length?`<div class="section-title">Songs</div><table class="song-table"><tbody>${songs.map(s=>`<tr onclick="playSong(${SONGS.indexOf(s)})"><td class="td-num">${s.icon}</td><td class="td-title">${s.title}</td><td class="td-artist">${s.artist}</td><td class="td-dur">${s.duration}</td></tr>`).join('')}</tbody></table>`:''}
+    ${verses.length?`<div class="section-title" style="margin-top:24px">Verses</div><div class="verse-grid">${verses.map(v=>`<div class="vc" onclick="showVerse(${VERSES.indexOf(v)})"><div class="vc-ref">${v.ref}</div><p class="vc-text">${v.text}</p></div>`).join('')}</div>`:''}
+    ${!songs.length&&!verses.length?'<p style="color:var(--muted);padding:32px 0">No results found.</p>':''}`;
+}
+
+function playSong(idx) {
+  curSong=idx; playing=true; progress=0;
+  clearInterval(timer); startTimer();
+  updatePlayer();
+  renderAllSongs(); renderFeatured(); renderGospelSongs();
+}
+function togglePlay() {
+  playing=!playing;
+  if(playing) startTimer(); else clearInterval(timer);
+  document.getElementById('pp-btn').textContent=playing?'⏸':'▶';
+}
+function prevSong() { playSong((curSong-1+SONGS.length)%SONGS.length); }
+function nextSong() { playSong((curSong+1)%SONGS.length); }
+function shuffle() { playSong(Math.floor(Math.random()*SONGS.length)); }
+
+function startTimer() {
+  timer=setInterval(()=>{
+    progress=Math.min(progress+0.25,100);
+    document.getElementById('prog-fill').style.width=progress+'%';
+    const [m,s]=SONGS[curSong].duration.split(':').map(Number);
+    const total=m*60+s;
+    const el=Math.floor((progress/100)*total);
+    document.getElementById('t-cur').textContent=Math.floor(el/60)+':'+(el%60+'').padStart(2,'0');
+    if(progress>=100){clearInterval(timer);nextSong();}
+  },300);
+}
+function seek(e) {
+  const b=document.getElementById('prog-bar');
+  progress=Math.max(0,Math.min(100,((e.clientX-b.getBoundingClientRect().left)/b.offsetWidth)*100));
+  document.getElementById('prog-fill').style.width=progress+'%';
+}
+function updatePlayer() {
+  const s=SONGS[curSong];
+  document.getElementById('pt-art').textContent=s.icon;
+  document.getElementById('pt-title').textContent=s.title;
+  document.getElementById('pt-artist').textContent=s.artist;
+  document.getElementById('t-tot').textContent=s.duration;
+  document.getElementById('pp-btn').textContent=playing?'⏸':'▶';
+}
+function toggleHeart() {
+  liked=!liked;
+  document.getElementById('heart-btn').textContent=liked?'♥':'♡';
+  document.getElementById('heart-btn').style.color=liked?'#f97316':'';
+}
+</script>
+</body>
+</html>
